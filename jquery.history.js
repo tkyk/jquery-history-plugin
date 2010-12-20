@@ -181,9 +181,9 @@
             }
             if(location.hash != "") {
                 this.check();
-                return;
+            } else {
+                self.callback(location.pathname);
             }
-            self.callback(location.pathname);
         },
         load: function(hash) {
             if($.support.html5history && !hash.indexOf('/')) {
