@@ -174,8 +174,24 @@
         check: function() {
             self.callback(locationWrapper.get());
         },
+        html5check: function(e) {
+            if(!arguments.callee.first_run) {
+                arguments.callee.first_run = true;
+                return;
+            }
+            if(location.hash != "") {
+                this.check();
+                return;
+            }
+            self.callback(location.pathname);
+        },
         load: function(hash) {
-            locationWrapper.put(hash);
+            if($.support.html5history && !hash.indexOf('/')) {
+                history.pushState({history: true}, "", hash);
+                this.html5check();
+            } else {
+                locationWrapper.put(hash);
+            }
         }
     };
 
@@ -187,6 +203,11 @@
         self.type = 'hashchangeEvent';
     } else {
         self.type = 'timer';
+    }
+
+    $.support.html5history = 'pushState' in history;
+    if($.support.html5history) {
+        $(window).bind('popstate', $.proxy(implementations.hashchangeEvent.html5check, implementations.hashchangeEvent));
     }
 
     $.extend(self, implementations[self.type]);
