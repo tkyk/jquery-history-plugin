@@ -174,21 +174,35 @@
         check: function() {
             self.callback(locationWrapper.get());
         },
+        load: function(hash) {
+            locationWrapper.put(hash);
+        }
+    };
+
+    implementations.html5StateHistory = {
+        _init: function() {
+            self.callback(locationWrapper.get());
+            $(window).bind('hashchange', self.check);
+            $(window).bind('popstate', self.html5check);
+        },
+        check: function() {
+            self.callback(locationWrapper.get());
+        },
         html5check: function(e) {
             if(!arguments.callee.first_run) {
                 arguments.callee.first_run = true;
                 return;
             }
             if(location.hash != "") {
-                this.check();
+                self.check();
             } else {
                 self.callback(location.pathname);
             }
         },
         load: function(hash) {
-            if($.support.html5history && !hash.indexOf('/')) {
+            if(!hash.indexOf('/')) {
                 history.pushState({history: true}, "", hash);
-                this.html5check();
+                self.html5check();
             } else {
                 locationWrapper.put(hash);
             }
@@ -199,15 +213,12 @@
 
     if($.browser.msie && ($.browser.version < 8 || document.documentMode < 8)) {
         self.type = 'iframeTimer';
+    } else if('pushState' in history) {
+        self.type = 'html5StateHistory';
     } else if("onhashchange" in window) {
         self.type = 'hashchangeEvent';
     } else {
         self.type = 'timer';
-    }
-
-    $.support.html5history = 'pushState' in history;
-    if($.support.html5history) {
-        $(window).bind('popstate', $.proxy(implementations.hashchangeEvent.html5check, implementations.hashchangeEvent));
     }
 
     $.extend(self, implementations[self.type]);
