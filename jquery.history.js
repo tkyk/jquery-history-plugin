@@ -25,6 +25,11 @@
  * THE SOFTWARE.
  */
 
+ /*
+  * Modified by Justin Walgran <jwalgran@azavea.com> 2011-03-09 to pass JSLint
+  * with default options.
+  */
+ 
 (function($) {
     var locationWrapper = {
         put: function(hash, win) {
@@ -68,15 +73,13 @@
                 unescape: false
             }, options || {});
 
-        locationWrapper.encoder = encoder(options.unescape);
-
         function encoder(unescape_) {
             if(unescape_ === true) {
                 return function(hash){ return hash; };
             }
-            if(typeof unescape_ == "string" &&
+            if(typeof unescape_ === "string" &&
                (unescape_ = partialDecoder(unescape_.split("")))
-               || typeof unescape_ == "function") {
+               || typeof unescape_ === "function") {
                 return function(hash) { return unescape_(encodeURIComponent(hash)); };
             }
             return encodeURIComponent;
@@ -86,6 +89,8 @@
             var re = new RegExp($.map(chars, encodeURIComponent).join("|"), "ig");
             return function(enc) { return enc.replace(re, decodeURIComponent); };
         }
+
+        locationWrapper.encoder = encoder(options.unescape);
     }
 
     var implementations = {};
@@ -117,13 +122,13 @@
         },
         check: function() {
             var current_hash = locationWrapper.get();
-            if(current_hash != self._appState) {
+            if(current_hash !== self._appState) {
                 self._appState = current_hash;
                 self.callback(current_hash);
             }
         },
         load: function(hash) {
-            if(hash != self._appState) {
+            if(hash !== self._appState) {
                 locationWrapper.put(hash);
                 self._appState = hash;
                 self.callback(hash);
@@ -144,8 +149,8 @@
             var iframe_hash = iframeWrapper.get(),
                 location_hash = locationWrapper.get();
 
-            if (location_hash != iframe_hash) {
-                if (location_hash == self._appState) {    // user used Back or Forward button
+            if (location_hash !== iframe_hash) {
+                if (location_hash === self._appState) {    // user used Back or Forward button
                     self._appState = iframe_hash;
                     locationWrapper.put(iframe_hash);
                     self.callback(iframe_hash); 
@@ -157,7 +162,7 @@
             }
         },
         load: function(hash) {
-            if(hash != self._appState) {
+            if(hash !== self._appState) {
                 locationWrapper.put(hash);
                 iframeWrapper.put(hash);
                 self._appState = hash;
@@ -191,4 +196,4 @@
 
     $.extend(self, implementations[self.type]);
     $.history = self;
-})(jQuery);
+}(jQuery));
