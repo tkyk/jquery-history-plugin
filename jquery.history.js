@@ -182,30 +182,19 @@
     implementations.html5StateHistory = {
         _init: function() {
             self.callback(locationWrapper.get());
-            $(window).bind('hashchange', self.check);
-            $(window).bind('popstate', self.html5check);
+            $(window).bind('popstate', self.check);
         },
-        check: function() {
+        check: function(e) {
             self.callback(locationWrapper.get());
         },
-        html5check: function(e) {
-            if(!arguments.callee.first_run) {
-                arguments.callee.first_run = true;
-                return;
-            }
-            if(location.hash != "") {
-                self.check();
+        load: function(hash, replace) {
+            hash = '#' + hash;
+            if (replace) {
+                history.replaceState({history: true}, "", hash);
             } else {
-                self.callback(location.pathname);
-            }
-        },
-        load: function(hash) {
-            if(!hash.indexOf('/')) {
                 history.pushState({history: true}, "", hash);
-                self.html5check();
-            } else {
-                locationWrapper.put(hash);
             }
+            self.check();
         }
     };
 
