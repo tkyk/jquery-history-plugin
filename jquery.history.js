@@ -91,7 +91,14 @@
     var implementations = {};
 
     implementations.base = {
-        callback: undefined,
+        /**
+         * The function called when the location.hash has changed.
+         * @param {String} hash - the current history entry's hash
+         * @param {Boolean} isInitialLoad - a flag indicating whether this is a 
+         *   a call to the callback after usage of back/fwd buttons (false) or
+         *   an initial load of the current page (true) 
+         */
+        callback: function(hash, isInitialLoad) {},
         type: undefined,
 
         check: function() {},
@@ -112,21 +119,21 @@
         _init: function() {
             var current_hash = locationWrapper.get();
             self._appState = current_hash;
-            self.callback(current_hash);
+            self.callback(current_hash, true);
             setInterval(self.check, 100);
         },
         check: function() {
             var current_hash = locationWrapper.get();
             if(current_hash != self._appState) {
                 self._appState = current_hash;
-                self.callback(current_hash);
+                self.callback(current_hash, false);
             }
         },
         load: function(hash) {
             if(hash != self._appState) {
                 locationWrapper.put(hash);
                 self._appState = hash;
-                self.callback(hash);
+                self.callback(hash, false);
             }
         }
     };
@@ -137,7 +144,7 @@
             var current_hash = locationWrapper.get();
             self._appState = current_hash;
             iframeWrapper.init().put(current_hash);
-            self.callback(current_hash);
+            self.callback(current_hash, true);
             setInterval(self.check, 100);
         },
         check: function() {
@@ -148,11 +155,11 @@
                 if (location_hash == self._appState) {    // user used Back or Forward button
                     self._appState = iframe_hash;
                     locationWrapper.put(iframe_hash);
-                    self.callback(iframe_hash); 
+                    self.callback(iframe_hash, false); 
                 } else {                              // user loaded new bookmark
                     self._appState = location_hash;  
                     iframeWrapper.put(location_hash);
-                    self.callback(location_hash);
+                    self.callback(location_hash, false);
                 }
             }
         },
@@ -161,21 +168,45 @@
                 locationWrapper.put(hash);
                 iframeWrapper.put(hash);
                 self._appState = hash;
-                self.callback(hash);
+                self.callback(hash, false);
             }
         }
     };
 
     implementations.hashchangeEvent = {
         _init: function() {
-            self.callback(locationWrapper.get());
+            self.callback(locationWrapper.get(), true);
             $(window).bind('hashchange', self.check);
         },
         check: function() {
-            self.callback(locationWrapper.get());
+            self.callback(locationWrapper.get(), false);
         },
         load: function(hash) {
             locationWrapper.put(hash);
+        }
+    };
+
+    /** 
+     * An implementation that uses HTML5 History API when possible.
+     * The benefit is that history.replaceState() can be used to set the hash 
+     * for the initial page load. See PHOENIX-630
+     */  
+    implementations.html5StateHistory = {
+        _init: function() {
+            self.callback(locationWrapper.get(), true);
+            $(window).bind('popstate', self.check);
+        },
+        check: function(e) {
+            self.callback(locationWrapper.get(), false);
+        },
+        load: function(hash, replace) {
+            hash = '#' + hash;
+            if (replace) {
+                history.replaceState({history: true}, "", hash);
+            } else {
+                history.pushState({history: true}, "", hash);
+            }
+            self.check();
         }
     };
 
@@ -183,6 +214,8 @@
 
     if($.browser.msie && ($.browser.version < 8 || document.documentMode < 8)) {
         self.type = 'iframeTimer';
+    } else if('pushState' in history) {
+        self.type = 'html5StateHistory';
     } else if("onhashchange" in window) {
         self.type = 'hashchangeEvent';
     } else {
