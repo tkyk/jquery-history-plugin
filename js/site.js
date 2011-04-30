@@ -15,7 +15,7 @@
 
     $(document).ready(function() {
             $.history.init(loadContent);
-            $('#navigation a').click(function(e) {
+            $('#navigation a').not('.external-link').click(function(e) {
                     var url = $(this).attr('href');
                     url = url.replace(/^.*#/, '');
                     $.history.load(url);
