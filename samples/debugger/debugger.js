@@ -27,9 +27,10 @@ $(document).ready(function() {
 		$('#hash-input').val(hash);
 	    });
 
-	function loadHistory(hash) {
-	    Logger.append('[load history] hash='+ hash);
-	    $.history.load(hash);
+	function loadHistory(hash, replace) {
+        var update = replace ? "replace" : "load";
+	    Logger.append('['+ update +' history] hash='+ hash);
+	    $.history.load(hash, !!replace);
 	}
 	
 	$(".history-links a").click(function(){
@@ -44,6 +45,13 @@ $(document).ready(function() {
 		var hash = $('#hash-input').val();
 		if(hash) {
 		    loadHistory(hash);
+		}
+	    });
+
+	$('#replace-hash').click(function() {
+		var hash = $('#hash-input').val();
+		if(hash) {
+		    loadHistory(hash, true);
 		}
 	    });
     });
