@@ -106,7 +106,7 @@
         init:  function(callback, options) {
             initObjects(options);
             self.callback = callback;
-            self._options = options;
+            self._options = options || {};
             self._init();
         },
 
@@ -192,21 +192,45 @@
      * for the initial page load. See PHOENIX-630
      */  
     implementations.html5StateHistory = {
+        _appState: undefined,
         _init: function() {
-            self.callback(locationWrapper.get(), true);
+            if(self._options.urlGenerator) {
+                self._urlGenerator = self._options.urlGenerator;
+            }
+
+            self._appState = locationWrapper.get();
+            history.replaceState({jqueryHistory: self._appState},
+                                 document.title);
+            self.callback(self._appState, true);
             $(window).bind('popstate', self.check);
         },
-        check: function(e) {
-            self.callback(locationWrapper.get(), false);
-        },
-        load: function(hash, replace) {
-            hash = '#' + hash;
-            if (replace) {
-                history.replaceState({history: true}, "", hash);
-            } else {
-                history.pushState({history: true}, "", hash);
+        _urlGenerator: function(newState, escapeFunc) {
+            var url = location.pathname + location.search;
+            if(newState != "") {
+                url+= "#"+ escapeFunc(newState);
             }
-            self.check();
+            return url;
+        },
+        check: function(e) {
+            var state = e.originalEvent.state;
+            if(state && state.jqueryHistory != null
+               && state.jqueryHistory != self._appState) {
+                self._appState = state.jqueryHistory;
+                self.callback(self._appState, false);
+            }
+        },
+        load: function(newState, replace) {
+            if(newState == self._appState) {
+                return;
+            }
+            var url = self._urlGenerator(newState, locationWrapper.encoder),
+                updateState = replace ? 'replaceState' : 'pushState';
+
+            history[updateState]({jqueryHistory: newState},
+                                 document.title,
+                                 url);
+            self._appState = newState;
+            self.callback(self._appState, false);
         }
     };
 
