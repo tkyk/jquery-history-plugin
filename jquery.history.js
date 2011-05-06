@@ -189,7 +189,7 @@
     /** 
      * An implementation that uses HTML5 History API when possible.
      * The benefit is that history.replaceState() can be used to set the hash 
-     * for the initial page load. See PHOENIX-630
+     * for the initial page load.
      */  
     implementations.html5StateHistory = {
         _appState: undefined,
