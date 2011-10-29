@@ -31,7 +31,7 @@ $(document).ready(function() {
 	    Logger.append('[load history] hash='+ hash);
 	    $.history.load(hash);
 	}
-	
+
 	$(".history-links a").click(function(){
 		var href = $(this).attr('href');
 		hash = href.replace(/^.*?#/, '');
