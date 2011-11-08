@@ -30,9 +30,9 @@ The second parameter is an option object. Currently only 'unescape' option is av
 <table class="options">
 <caption>Options</caption>
 <tr><th rowspan="3">unescape</th>
-    <td>true [default]</td><td>The plugin encode the URL hash using encodeURICompnent to escape the special characters which are "reserved" in RFC 2396.<code></code></td></tr>
-<tr><td>false</td><td>The plugin does not escape characters at all. This may cause a problem.</td></tr>
-<tr><td>string</td><td>Characters contained in the string is unescaped  e.g. <code>{unescape:"/;"}</code> unescapes '/' and ';'.</td></tr>
+    <td>false [default]</td><td>The plugin encodes the URL hash using encodeURICompnent to escape the special characters which are "reserved" in RFC 2396.<code></code></td></tr>
+<tr><td>true</td><td>The plugin does not escape characters at all. This may cause a problem.</td></tr>
+<tr><td>string</td><td>Characters contained in the string are unescaped  e.g. <code>{unescape:"/;"}</code> unescapes '/' and ';'.</td></tr>
 </tr>
 </table>
 <h3>jQuery.history.load(hash)</h3>
