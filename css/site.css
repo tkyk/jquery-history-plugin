@@ -57,3 +57,28 @@ dl.known-issues dt, dl.history dt {
     border-width: 0 0 1px 0;
 }
 
+#caution {
+  width: 95%;
+  text-align:center;
+  border: 3px red solid;
+  background-color: #FFBDBD;
+  margin:1em auto;
+}
+#caution a {
+    text-decoration: underline;
+}
+
+#caution h1 {
+  font-family:serif;
+  font-size: 1.5em;
+  color: #9C0000;
+}
+
+#caution p {
+  text-align: center;
+}
+
+#updated-on {
+  font-size: 0.7em;
+  color: #9C0000;
+}
